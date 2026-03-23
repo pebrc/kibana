@@ -64,6 +64,10 @@ import { expect } from '@kbn/scout-security/ui';`,
       filename: PLATFORM_SRC_TEST,
       code: `import { test } from '@kbn/scout';`,
     },
+    {
+      filename: PLATFORM_XPACK_TEST,
+      code: `import { visualTest } from '@kbn/scout-vrt';`,
+    },
   ],
 
   invalid: [

@@ -17,9 +17,10 @@ const SOLUTION_PACKAGES = {
 
 /**
  * Determines which Scout package a test file should import from based on its path.
- * Defaults to @kbn/scout unless the file is under a supported solution (security, observability, search).
+ * Defaults to platform Scout packages unless the file is under a supported solution
+ * (security, observability, search).
  * @param {string} filePath
- * @returns {{ solution?: string, package: string } | null}
+ * @returns {{ solution?: string, packages: string[] } | null}
  */
 const getAllowedPackage = (filePath) => {
   // Solution plugin test files with a dedicated Scout package
@@ -29,7 +30,7 @@ const getAllowedPackage = (filePath) => {
   if (solutionMatch) {
     const solution = solutionMatch[1];
     const pkg = SOLUTION_PACKAGES[solution];
-    return { solution, package: pkg || '@kbn/scout' };
+    return { solution, packages: [pkg || '@kbn/scout'] };
   }
 
   // Platform plugin test files (src/platform and x-pack/platform)
@@ -38,7 +39,7 @@ const getAllowedPackage = (filePath) => {
       filePath
     )
   ) {
-    return { package: '@kbn/scout' };
+    return { packages: ['@kbn/scout', '@kbn/scout-vrt'] };
   }
 
   return null;
@@ -61,13 +62,13 @@ module.exports = {
     type: 'problem',
     docs: {
       description:
-        'Ensure Scout test files import only from their designated Scout package. Solution tests must use their solution-specific package, platform tests must use @kbn/scout.',
+        'Ensure Scout test files import only from their designated Scout package. Solution tests must use their solution-specific package, platform tests must use @kbn/scout or @kbn/scout-vrt.',
       category: 'Best Practices',
     },
     schema: [],
     messages: {
       platformTestImport:
-        "Tests without a solution-specific Scout package should import from '@kbn/scout'.",
+        "Platform Scout tests should import only from '@kbn/scout' or '@kbn/scout-vrt'.",
       solutionTestImport: "'{{solution}}' solution tests should import from '{{allowedPackage}}'.",
     },
   },
@@ -84,7 +85,7 @@ module.exports = {
       const source = sourceNode.value;
       const scoutPkg = getScoutPackage(source);
 
-      if (!scoutPkg || scoutPkg === allowed.package) {
+      if (!scoutPkg || allowed.packages.includes(scoutPkg)) {
         return;
       }
 
@@ -93,7 +94,7 @@ module.exports = {
         messageId: allowed.solution ? 'solutionTestImport' : 'platformTestImport',
         data: {
           solution: allowed.solution,
-          allowedPackage: allowed.package,
+          allowedPackage: allowed.packages[0],
         },
       });
     };
