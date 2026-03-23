@@ -8548,6 +8548,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-vrt@link:src/platform/packages/shared/kbn-scout-vrt":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
