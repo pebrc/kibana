@@ -12,7 +12,7 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
-import type { InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
@@ -180,6 +180,9 @@ describe('attackDiscoveryScheduleExecutor', () => {
       isInferenceEndpoint: false,
       isPreconfigured: false,
     });
+    mockInference.getClientWithoutRequest.mockReturnValue({
+      chatComplete: jest.fn(),
+    } as unknown as InferenceClient);
 
     (findDocuments as jest.Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
@@ -274,8 +277,18 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const { query, filters, combinedFilter, ...restParams } = params;
     expect(generateAttackDiscoveries).toHaveBeenCalledWith({
       actionsClient,
-      config: { ...restParams, filter: combinedFilter, anonymizationFields, subAction: 'invokeAI' },
+      config: {
+        ...restParams,
+        apiConfig: {
+          ...restParams.apiConfig,
+          actionTypeId: params.apiConfig.actionTypeId,
+        },
+        filter: combinedFilter,
+        anonymizationFields,
+        subAction: 'invokeAI',
+      },
       esClient: services.scopedClusterClient.asCurrentUser,
+      inferenceClient: expect.objectContaining({ chatComplete: expect.any(Function) }),
       logger: mockLogger,
       savedObjectsClient: services.savedObjectsClient,
     });
@@ -322,7 +335,6 @@ describe('attackDiscoveryScheduleExecutor', () => {
       attackDiscoveries: mockAttackDiscoveries,
       duplicatesDroppedCount: 0,
       durationMs: 0,
-      end: undefined,
       hasFilter: true,
       scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
       size: 123,
@@ -605,6 +617,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
     const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
+    mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
       getInference: () => mockInference,
@@ -624,6 +637,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
     const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
+    mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
       getInference: () => mockInference,
@@ -660,6 +674,63 @@ describe('attackDiscoveryScheduleExecutor', () => {
     );
 
     expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
+  });
+
+  it('throws a TaskRunError when workflowConfig is present but executor factory returns undefined', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        workflowConfig: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        getInference: () => mockInference,
+        getWorkflowExecutorFactory: () => undefined,
+        logger: mockLogger,
+        options,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(expect.objectContaining({ source: TaskErrorSource.USER }));
+  });
+
+  it('throws a TaskRunError with source USER so Task Manager does not retry when executor factory is missing', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        workflowConfig: {
+          alertRetrievalWorkflowIds: [],
+          defaultAlertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        getInference: () => mockInference,
+        getWorkflowExecutorFactory: () => undefined,
+        logger: mockLogger,
+        options,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(expect.objectContaining({ source: TaskErrorSource.USER }));
+
+    expect(createTaskRunError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('no workflow executor is registered'),
+      }),
+      TaskErrorSource.USER
+    );
   });
 
   it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
