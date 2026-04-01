@@ -12,11 +12,14 @@ import { useMonitoringView } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import type { ActionTriggeredGenerationsResponse } from '../../monitoring/types';
 import { useActionTriggeredGenerations } from '../../monitoring/use_action_triggered_generations';
+import { useWorkflowTracking } from '../../../hooks/use_workflow_tracking';
 
 jest.mock('../../monitoring/use_action_triggered_generations');
+jest.mock('../../../hooks/use_workflow_tracking');
 
 const mockRefetch = jest.fn();
 const mockUseActionTriggeredGenerations = useActionTriggeredGenerations as jest.Mock;
+const mockUseWorkflowTracking = useWorkflowTracking as jest.Mock;
 
 const mockData: ActionTriggeredGenerationsResponse = {
   data: [
@@ -69,6 +72,10 @@ describe('useMonitoringView', () => {
       isError: false,
       isLoading: false,
       refetch: mockRefetch,
+    });
+
+    mockUseWorkflowTracking.mockReturnValue({
+      data: null,
     });
   });
 

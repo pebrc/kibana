@@ -17,10 +17,13 @@ import {
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
+import type { ActionTriggeredGeneration } from '../../monitoring/types';
 import { ActionTriggeredRunsTable } from '../../monitoring/action_triggered_runs_table';
 import { EmptyPage } from '../../monitoring/empty_page';
 import { SearchAndFilter } from '../../monitoring/search_and_filter';
 import { useActionTriggeredGenerations } from '../../monitoring/use_action_triggered_generations';
+import { useWorkflowTracking } from '../../../hooks/use_workflow_tracking';
+import { WorkflowExecutionDetailsFlyout } from '../../../loading_callout/workflow_execution_details_flyout';
 import * as i18n from './translations';
 
 export interface UseMonitoringView {
@@ -31,6 +34,12 @@ export interface UseMonitoringView {
 const DEFAULT_END = 'now';
 const DEFAULT_PAGE_SIZE = 20;
 const DEFAULT_START = 'now-24h';
+
+const STATUS_TO_GENERATION_STATUS: Record<string, 'started' | 'succeeded' | 'failed'> = {
+  failed: 'failed',
+  running: 'started',
+  succeeded: 'succeeded',
+};
 
 export const useMonitoringView = (): UseMonitoringView => {
   const { http } = useAssistantContext();
@@ -77,8 +86,23 @@ export const useMonitoringView = (): UseMonitoringView => {
     setPageIndex(0);
   }, []);
 
-  // no-op: WorkflowExecutionDetailsFlyout is added in PR 7 (UI: Execution Monitoring)
-  const handleViewDetails = useCallback(() => {}, []);
+  const [selectedItem, setSelectedItem] = useState<ActionTriggeredGeneration | null>(null);
+
+  const { data: trackingData } = useWorkflowTracking({
+    executionId: selectedItem?.execution_uuid ?? null,
+    http,
+  });
+
+  const workflowId = trackingData?.generation?.workflow_id ?? null;
+  const workflowRunId = trackingData?.generation?.workflow_run_id ?? null;
+
+  const handleViewDetails = useCallback((item: ActionTriggeredGeneration) => {
+    setSelectedItem(item);
+  }, []);
+
+  const handleCloseFlyout = useCallback(() => {
+    setSelectedItem(null);
+  }, []);
 
   const content = useMemo(() => {
     if (isLoading) {
@@ -115,16 +139,42 @@ export const useMonitoringView = (): UseMonitoringView => {
     }
 
     return (
-      <ActionTriggeredRunsTable
-        items={data.data}
-        onPageChange={handlePageChange}
-        onViewDetails={handleViewDetails}
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        total={data.total}
-      />
+      <>
+        <ActionTriggeredRunsTable
+          items={data.data}
+          onPageChange={handlePageChange}
+          onViewDetails={handleViewDetails}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          total={data.total}
+        />
+
+        {selectedItem != null && workflowId != null && workflowRunId != null && (
+          <WorkflowExecutionDetailsFlyout
+            executionUuid={selectedItem.execution_uuid}
+            generationStatus={STATUS_TO_GENERATION_STATUS[selectedItem.status]}
+            http={http}
+            onClose={handleCloseFlyout}
+            workflowId={workflowId}
+            workflowRunId={workflowRunId}
+          />
+        )}
+      </>
     );
-  }, [data, handlePageChange, handleViewDetails, isError, isLoading, pageIndex, pageSize]);
+  }, [
+    data,
+    handleCloseFlyout,
+    handlePageChange,
+    handleViewDetails,
+    http,
+    isError,
+    isLoading,
+    pageIndex,
+    pageSize,
+    selectedItem,
+    workflowId,
+    workflowRunId,
+  ]);
 
   const monitoringView = useMemo(
     () => (
