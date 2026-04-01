@@ -295,5 +295,7 @@
     "@kbn/search-inference-endpoints",
     "@kbn/shared-ux-column-presets",
     "@kbn/core-overlays-browser",
+    "@kbn/discoveries",
+    "@kbn/discoveries-schemas"
   ]
 }
