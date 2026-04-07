@@ -150,6 +150,14 @@
       "ciLabels": [
         "evals:attack-discovery"
       ]
+    },
+    {
+      "id": "security-automatic-migrations",
+      "name": "Security Automatic Migrations",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/playwright.config.ts",
+      "tags": ["security", "migrations"],
+      "ciLabels": ["evals:security-automatic-migrations"]
     }
   ]
 }
