@@ -41,7 +41,7 @@ const mosaicStateSharedSchema = {
         meta: {
           id: 'mosaicLegend',
           title: 'Legend',
-          description: 'Legend configuration for mosaic chart appearance and behavior',
+          description: 'Legend configuration for mosaic chart appearance and behavior.',
         },
       }
     )
@@ -113,7 +113,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
         {
           minSize: 1,
           maxSize: 100,
-          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+          meta: { description: 'Array of breakdown dimensions (minimum 1).' },
         }
       )
     ),
@@ -128,7 +128,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
         {
           minSize: 1,
           maxSize: 100,
-          meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
+          meta: { description: 'Array of group breakdown dimensions (minimum 1).' },
         }
       )
     ),
@@ -138,7 +138,7 @@ export const mosaicStateSchemaNoESQL = schema.object(
       id: 'mosaicNoESQL',
       title: 'Mosaic Chart (DSL)',
       description:
-        'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
+        'Mosaic chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions.',
     },
     validate: validateMosaicGroupings,
   }
@@ -157,7 +157,7 @@ export const mosaicStateSchemaESQL = schema.object(
     metric: esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema, {
       meta: {
         description:
-          'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection',
+          'Metric configuration for ES|QL mode, combining generic options, primary metric options, and column selection.',
       },
     }),
     /**
@@ -167,14 +167,14 @@ export const mosaicStateSchemaESQL = schema.object(
       schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
-        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
+        meta: { description: 'Array of breakdown dimensions (minimum 1).' },
       })
     ),
     group_breakdown_by: schema.maybe(
       schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
-        meta: { description: 'Array of group breakdown dimensions (minimum 1)' },
+        meta: { description: 'Array of group breakdown dimensions (minimum 1).' },
       })
     ),
   },
@@ -183,7 +183,7 @@ export const mosaicStateSchemaESQL = schema.object(
       id: 'mosaicESQL',
       title: 'Mosaic Chart (ES|QL)',
       description:
-        'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
+        'Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration.',
     },
     validate: validateMosaicGroupings,
   }
@@ -194,7 +194,7 @@ export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicSt
     id: 'mosaicChart',
     title: 'Mosaic Chart',
     description:
-      'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
+      'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes.',
   },
 });
 

@@ -35,7 +35,7 @@ const gaugeStateSharedOptionsSchema = {
             meta: {
               id: 'gaugeShapeBullet',
               title: 'Shape (Bullet)',
-              description: 'Bullet gauge shape',
+              description: 'Bullet gauge shape.',
             },
           }
         ),
@@ -51,7 +51,7 @@ const gaugeStateSharedOptionsSchema = {
             meta: {
               id: 'gaugeShapeCircular',
               title: 'Shape (Circular)',
-              description: 'Circular gauge shape',
+              description: 'Circular gauge shape.',
             },
           }
         ),
@@ -103,13 +103,13 @@ const gaugeStateMetricOptionsSchema = {
       {
         visible: schema.maybe(
           schema.boolean({
-            meta: { description: 'Show the title' },
+            meta: { description: 'When `true`, displays the title.' },
             defaultValue: true,
           })
         ),
-        text: schema.maybe(schema.string({ meta: { description: 'Title text' } })),
+        text: schema.maybe(schema.string({ meta: { description: 'Title text.' } })),
       },
-      { meta: { description: 'Title configuration' } }
+      { meta: { description: 'Title configuration.' } }
     )
   ),
   /**
@@ -132,18 +132,18 @@ const gaugeStateMetricOptionsSchema = {
       {
         visible: schema.maybe(
           schema.boolean({
-            meta: { description: 'Show tick marks' },
+            meta: { description: 'When `true`, displays tick marks.' },
             defaultValue: true,
           })
         ),
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
-            meta: { description: 'Tick placement mode' },
+            meta: { description: 'Tick placement mode (`auto` or `bands`).' },
             defaultValue: 'auto',
           })
         ),
       },
-      { meta: { description: 'Ticks configuration' } }
+      { meta: { description: 'Ticks configuration.' } }
     )
   ),
 };

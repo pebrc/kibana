@@ -38,12 +38,12 @@ const legendSchemaProps = {
 
 const labelsSchemaProps = {
   visible: schema.maybe(
-    schema.boolean({ defaultValue: true, meta: { description: 'Show axis labels' } })
+    schema.boolean({ defaultValue: true, meta: { description: 'When `true`, displays axis labels.' } })
   ),
   orientation: schema.maybe(
     builderEnums.orientation({
       defaultValue: 'horizontal',
-      meta: { description: 'Orientation of the axis labels' },
+      meta: { description: 'Orientation of the axis labels.' },
     })
   ),
 };
@@ -51,7 +51,7 @@ const labelsSchemaProps = {
 const simpleLabelsSchema = schema.object(omit(labelsSchemaProps, 'orientation'));
 
 const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-  meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
+  meta: { description: 'Axis sort order; omit or use undefined for no sorting.' },
 });
 
 const heatmapSharedStateSchema = {
@@ -61,7 +61,7 @@ const heatmapSharedStateSchema = {
       meta: {
         id: 'heatmapLegend',
         title: 'Legend',
-        description: 'Legend configuration',
+        description: 'Legend configuration.',
       },
     })
   ),
@@ -82,7 +82,7 @@ const heatmapSharedStateSchema = {
               meta: {
                 id: 'heatmapXAxis',
                 title: 'X Axis',
-                description: 'X axis configuration',
+                description: 'X axis configuration.',
               },
             }
           )
@@ -98,7 +98,7 @@ const heatmapSharedStateSchema = {
               meta: {
                 id: 'heatmapYAxis',
                 title: 'Y Axis',
-                description: 'Y axis configuration',
+                description: 'Y axis configuration.',
               },
             }
           )
@@ -108,7 +108,7 @@ const heatmapSharedStateSchema = {
         meta: {
           id: 'heatmapAxes',
           title: 'Axes',
-          description: 'Axis configuration for X and Y axes',
+          description: 'Axis configuration for X and Y axes.',
         },
       }
     )
@@ -121,13 +121,13 @@ const heatmapSharedStateSchema = {
             visible: schema.maybe(
               schema.boolean({
                 defaultValue: false,
-                meta: { description: 'Show cell labels' },
+                meta: { description: 'When `true`, displays cell labels.' },
               })
             ),
           })
         ),
       },
-      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
+      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration.' } }
     )
   ),
 };
